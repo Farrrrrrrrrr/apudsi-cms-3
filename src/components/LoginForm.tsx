@@ -31,7 +31,13 @@ export default function LoginForm() {
       });
       
       if (result?.error) {
-        setError('Invalid email or password');
+        console.error('Login error:', result.error);
+        setError('Invalid email or password. Please try again.');
+        return;
+      }
+      
+      if (!result?.ok) {
+        setError('An unexpected error occurred. Please try again later.');
         return;
       }
       
@@ -40,7 +46,7 @@ export default function LoginForm() {
       router.refresh();
     } catch (err) {
       console.error('Login error:', err);
-      setError('An error occurred during login');
+      setError('Authentication service is unavailable. Please try again later.');
     } finally {
       setLoading(false);
     }

@@ -24,12 +24,13 @@ This project uses [`next/font`](https://nextjs.org/docs/app/building-your-applic
 
 This project uses Aiven for database hosting. To connect to your Aiven database:
 
-1. Download the SSL certificates from your Aiven console
-2. Place the certificates in the `./certs` directory:
-   - `ca.pem` - The certificate authority certificate
-   - `client.pem` - Client certificate (if required)
-   - `client.key` - Client key (if required)
-3. Copy `.env.example` to `.env` and update the database connection details
+1. Copy `.env.example` to `.env` and update it with your Aiven database credentials
+2. By default, the app is configured to connect to Aiven without certificate verification (similar to HeidiSQL)
+3. If you need to use certificate verification:
+   - Set `DB_VERIFY_CERTIFICATE=true` in your .env file
+   - Download the SSL certificates from your Aiven console
+   - Place the certificates in the `./certs` directory
+   - Update the certificate paths in your .env file
 
 Note: The certificates directory is git-ignored for security reasons.
 

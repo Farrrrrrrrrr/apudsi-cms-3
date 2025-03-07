@@ -2,7 +2,8 @@ import NextAuth from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { getUserByCredentials, getUserById } from '@/lib/database';
 
-const handler = NextAuth({
+// Create the configuration object
+const authOptions = {
   providers: [
     CredentialsProvider({
       name: 'Credentials',
@@ -15,22 +16,27 @@ const handler = NextAuth({
           return null;
         }
 
-        const user = await getUserByCredentials(
-          credentials.email,
-          credentials.password
-        );
+        try {
+          const user = await getUserByCredentials(
+            credentials.email,
+            credentials.password
+          );
 
-        if (user) {
-          // Return user without sensitive data
-          return {
-            id: user.id.toString(),
-            name: user.name,
-            email: user.email,
-            role: user.role || 'user'
-          };
+          if (user) {
+            // Return user without sensitive data
+            return {
+              id: user.id.toString(),
+              name: user.name,
+              email: user.email,
+              role: user.role || 'user'
+            };
+          }
+          
+          return null;
+        } catch (error) {
+          console.error("Authentication error:", error);
+          return null;
         }
-        
-        return null;
       }
     }),
   ],
@@ -58,6 +64,10 @@ const handler = NextAuth({
     strategy: 'jwt',
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
-});
+};
 
+// Create the handler
+const handler = NextAuth(authOptions);
+
+// Export the handler as GET and POST
 export { handler as GET, handler as POST };
