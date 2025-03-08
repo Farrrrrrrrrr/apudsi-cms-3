@@ -22,6 +22,23 @@ async function createSchema() {
       )
     `);
     
+    console.log('Creating draft articles table...');
+    
+    // Create draft articles table instead of simple_articles
+    await db.execute(`
+      CREATE TABLE IF NOT EXISTS draft (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        title VARCHAR(255) NOT NULL,
+        image_url VARCHAR(1000) NOT NULL,
+        content TEXT NOT NULL,
+        author_id INT NOT NULL,
+        status VARCHAR(50) DEFAULT 'draft',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE CASCADE
+      )
+    `);
+    
     // Check if we need to create an initial admin user
     const [users] = await db.execute('SELECT COUNT(*) as count FROM users');
     const userCount = (users as any[])[0].count;

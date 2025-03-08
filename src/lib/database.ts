@@ -98,3 +98,88 @@ export async function getUserById(id: string | number) {
     throw error; // Re-throw to allow proper error handling upstream
   }
 }
+
+export interface SimpleArticle {
+  id?: number;
+  title: string;
+  image_url: string;
+  content: string;
+  author_id: number;
+  status?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export async function createSimpleArticle(article: SimpleArticle) {
+  try {
+    const db = await getDbConnection();
+    
+    // Changed table name from simple_articles to draft
+    const [result] = await db.execute(
+      'INSERT INTO draft (title, image_url, content, author_id, status) VALUES (?, ?, ?, ?, ?)',
+      [article.title, article.image_url, article.content, article.author_id, article.status || 'draft']
+    );
+    
+    const insertId = (result as any).insertId;
+    return { ...article, id: insertId };
+  } catch (error) {
+    console.error('Database error in createSimpleArticle:', error);
+    throw error;
+  }
+}
+
+export async function getSimpleArticles() {
+  try {
+    const db = await getDbConnection();
+    
+    // Changed table name from simple_articles to draft
+    const [rows] = await db.execute(`
+      SELECT a.*, u.name as author_name 
+      FROM draft a 
+      JOIN users u ON a.author_id = u.id 
+      ORDER BY a.created_at DESC
+    `);
+    
+    return rows as any[];
+  } catch (error) {
+    console.error('Database error in getSimpleArticles:', error);
+    throw error;
+  }
+}
+
+export async function getSimpleArticleById(id: number) {
+  try {
+    const db = await getDbConnection();
+    
+    // Changed table name from simple_articles to draft
+    const [rows] = await db.execute(`
+      SELECT a.*, u.name as author_name 
+      FROM draft a 
+      JOIN users u ON a.author_id = u.id 
+      WHERE a.id = ?
+    `, [id]);
+    
+    const articles = rows as any[];
+    return articles[0] || null;
+  } catch (error) {
+    console.error('Database error in getSimpleArticleById:', error);
+    throw error;
+  }
+}
+
+export async function updateSimpleArticle(article: SimpleArticle) {
+  try {
+    const db = await getDbConnection();
+    
+    // Changed table name from simple_articles to draft
+    await db.execute(
+      'UPDATE draft SET title = ?, image_url = ?, content = ?, status = ? WHERE id = ?',
+      [article.title, article.image_url, article.content, article.status || 'draft', article.id]
+    );
+    
+    return article;
+  } catch (error) {
+    console.error('Database error in updateSimpleArticle:', error);
+    throw error;
+  }
+}

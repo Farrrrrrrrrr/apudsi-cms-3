@@ -1,9 +1,10 @@
 'use client';
 
 import { useSession, signOut } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useEffect } from 'react';
 import styles from './DashboardLayout.module.css';
+import Link from 'next/link';
 
 export default function DashboardLayout({
   children,
@@ -12,6 +13,7 @@ export default function DashboardLayout({
 }) {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const pathname = usePathname();
 
   // Protect dashboard routes
   useEffect(() => {
@@ -28,13 +30,21 @@ export default function DashboardLayout({
     return null;
   }
 
+  const isActive = (path: string) => {
+    return pathname === path || pathname?.startsWith(`${path}/`);
+  };
+
   return (
     <div className={styles.dashboardContainer}>
       <aside className={styles.sidebar}>
         <div className={styles.logo}>APUDSI CMS</div>
         <nav className={styles.nav}>
-          <a href="/dashboard" className={styles.navLink}>Dashboard</a>
-          <a href="/dashboard/profile" className={styles.navLink}>Profile</a>
+          <Link href="/dashboard" className={`${styles.navLink} ${isActive('/dashboard') && pathname === '/dashboard' ? styles.active : ''}`}>Dashboard</Link>
+          
+          {/* New Article Editor Menu Item */}
+          <Link href="/dashboard/article-editor" className={`${styles.navLink} ${isActive('/dashboard/article-editor') ? styles.active : ''}`}>Article Editor</Link>
+          
+          <Link href="/dashboard/profile" className={`${styles.navLink} ${isActive('/dashboard/profile') ? styles.active : ''}`}>Profile</Link>
           {/* Add more navigation items as needed */}
         </nav>
         <div className={styles.sidebarFooter}>
@@ -46,7 +56,11 @@ export default function DashboardLayout({
       
       <main className={styles.mainContent}>
         <header className={styles.header}>
-          <div className={styles.headerTitle}>Dashboard</div>
+          <div className={styles.headerTitle}>
+            {pathname === '/dashboard' && 'Dashboard'}
+            {pathname === '/dashboard/article-editor' && 'Article Editor'}
+            {pathname === '/dashboard/profile' && 'Profile'}
+          </div>
           <div className={styles.userInfo}>
             <span>Welcome, {session.user.name}</span>
           </div>
